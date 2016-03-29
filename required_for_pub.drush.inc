@@ -14,19 +14,28 @@ function required_for_pub_drush_command() {
     'examples' => array(
       'drush rfp-c node' => 'Converts all node fields (with confirmation).',
       'drush rfp-c node page' => 'Converts all basic page fields (with confirmation).',
-      'drush -y rfp-c node page' => 'Converts all basic page fields (WITHOUT confirmation).',
-    )
+      'drush -y rfp-c node page' => 'CAREFUL! Converts all basic page fields (WITHOUT confirmation).',
+    ),
   );
   return $items;
 }
 
-function drush_required_for_pub_convert($type='node', $bundle = NULL) {
-  $entities = field_info_instances($type, $bundle);
+/**
+ * Bulk converts required fields to required_for_pub.
+ * @param string $entity_type - The entity type. Defaults to 'node'.
+ * @param null $bundle - The bundle type. If NULL, will find all bundles.
+ * @throws \FieldException
+ */
+function drush_required_for_pub_convert($entity_type='node', $bundle = NULL) {
+  $entities = field_info_instances($entity_type, $bundle);
+  
+  // Field_info_instances wraps its output array in entity and bundle keys if
+  // they are not present. Mimic this if they are set. 
   if ($bundle) {
     $entities = array($bundle => $entities);
   }
-  if ($type) {
-    $entities = array($type => $entities);
+  if ($entity_type) {
+    $entities = array($entity_type => $entities);
   }
   foreach ($entities as $entity_name => $bundles) {
     foreach ($bundles as $bundle_name => $fields) {
